@@ -1,0 +1,191 @@
+{
+    "pageDimensions": [
+        2480,
+        3508
+    ],
+    "bubbleDimensions": [
+        45,
+        45
+    ],
+    "customLabels": {
+        "AdmissionNo": [
+            "digit1",
+            "digit2",
+            "digit3",
+            "digit4",
+            "digit5"
+        ]
+    },
+    "fieldBlocks": {
+        "AdmissionBlock": {
+            "fieldType": "QTYPE_MCQ10",
+            "origin": [
+                80,
+                520
+            ],
+            "fieldLabels": [
+                "A1",
+                "A2",
+                "A3",
+                "A4",
+                "A5"
+            ],
+            "bubblesGap": 50,
+            "labelsGap": 45
+        },
+        "Math1_Block": {
+            "fieldType": "QTYPE_MCQ4",
+            "origin": [
+                400,
+                1100
+            ],
+            "fieldLabels": [
+                "Q1",
+                "Q2",
+                "Q3",
+                "Q4",
+                "Q5",
+                "Q6",
+                "Q7",
+                "Q8"
+            ],
+            "bubblesGap": 55,
+            "labelsGap": 55
+        },
+        "Math2_Block": {
+            "fieldType": "QTYPE_MCQ4",
+            "origin": [
+                700,
+                1100
+            ],
+            "fieldLabels": [
+                "Q9",
+                "Q10",
+                "Q11",
+                "Q12",
+                "Q13",
+                "Q14",
+                "Q15",
+                "Q16"
+            ],
+            "bubblesGap": 55,
+            "labelsGap": 55
+        },
+        "Physics_Block": {
+            "fieldType": "QTYPE_MCQ4",
+            "origin": [
+                1000,
+                1100
+            ],
+            "fieldLabels": [
+                "Q17",
+                "Q18",
+                "Q19",
+                "Q20",
+                "Q21",
+                "Q22",
+                "Q23",
+                "Q24"
+            ],
+            "bubblesGap": 55,
+            "labelsGap": 55
+        },
+        "Chemistry_Block": {
+            "fieldType": "QTYPE_MCQ4",
+            "origin": [
+                1300,
+                1100
+            ],
+            "fieldLabels": [
+                "Q25",
+                "Q26",
+                "Q27",
+                "Q28",
+                "Q29",
+                "Q30",
+                "Q31",
+                "Q32"
+            ],
+            "bubblesGap": 55,
+            "labelsGap": 55
+        },
+        "MAT_Block": {
+            "fieldType": "QTYPE_MCQ4",
+            "origin": [
+                1600,
+                1100
+            ],
+            "fieldLabels": [
+                "Q33",
+                "Q34",
+                "Q35",
+                "Q36",
+                "Q37",
+                "Q38",
+                "Q39",
+                "Q40"
+            ],
+            "bubblesGap": 55,
+            "labelsGap": 55
+        }
+    },
+    "preProcessors": [
+        {
+            "name": "CropPage",
+            "options": {
+                "morphKernel": [
+                    10,
+                    10
+                ]
+            }
+        }
+    ],
+    "outputColumns": [
+        "A1",
+        "A2",
+        "A3",
+        "A4",
+        "A5",
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "Q5",
+        "Q6",
+        "Q7",
+        "Q8",
+        "Q9",
+        "Q10",
+        "Q11",
+        "Q12",
+        "Q13",
+        "Q14",
+        "Q15",
+        "Q16",
+        "Q17",
+        "Q18",
+        "Q19",
+        "Q20",
+        "Q21",
+        "Q22",
+        "Q23",
+        "Q24",
+        "Q25",
+        "Q26",
+        "Q27",
+        "Q28",
+        "Q29",
+        "Q30",
+        "Q31",
+        "Q32",
+        "Q33",
+        "Q34",
+        "Q35",
+        "Q36",
+        "Q37",
+        "Q38",
+        "Q39",
+        "Q40"
+    ],
+    "emptyValue": ""
+}
