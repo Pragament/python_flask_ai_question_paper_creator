@@ -1469,7 +1469,6 @@ def finalize_questions():
 
     return render_template("result.html", paper_json=final_output, pdf_code="PDF generated successfully.")
 
-# 3 Route to download the generated PDF (result.html)
 @app.route('/download_pdf')
 def download_pdf():
     try:
@@ -1498,6 +1497,13 @@ def finalize_prereq():
     }
 
     return redirect(url_for("generate_questions"))
+    
+import webbrowser
+import threading
+
+def open_browser():
+    webbrowser.open('http://localhost:5000')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    threading.Timer(1.0, open_browser).start()
+    app.run(host='0.0.0.0', port=5000)
