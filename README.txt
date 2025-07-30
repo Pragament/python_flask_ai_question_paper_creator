@@ -14,6 +14,7 @@ Prerequisites
 
 Running the App
 --------------
+install the requirnment and run this pyinstaller YourFlaskApp.spec
 1. Double-click the "Your Flask App" shortcut on your desktop or Start Menu.
 2. Open a web browser and go to http://127.0.0.1:5000.
 3. Follow the on-screen instructions to select chapters and generate question papers.
