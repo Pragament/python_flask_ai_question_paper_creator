@@ -7,6 +7,7 @@ import subprocess
 import io
 import uuid
 from fpdf import FPDF
+from utils import generate_docx
 from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, session
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
@@ -1693,6 +1694,7 @@ def finalize_questions():
 
     return render_template("result.html", paper_json=final_output, pdf_code="PDF generated successfully.")
 
+
 # 3 Route to download the generated PDF (result.html)
 @app.route('/download_pdf')
 def download_pdf():
@@ -1704,6 +1706,20 @@ def download_pdf():
         if not os.path.exists("Question.pdf"):
             generate_pdf(paper_json, "Question.pdf")
         return send_file("Question.pdf", as_attachment=True)
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+# Route to download the generated Word DOCX
+@app.route('/download_docx')
+def download_docx():
+    try:
+        with open("paper.json", "r") as f:
+            paper_json = json.load(f)
+        if not paper_json.get("questions"):
+            return "Error: No questions available."
+        if not os.path.exists("Question.docx"):
+            generate_docx(paper_json, "Question.docx")
+        return send_file("Question.docx", as_attachment=True)
     except Exception as e:
         return f"Error: {str(e)}"
 
