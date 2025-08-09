@@ -148,6 +148,22 @@
 
         <div class="space-y-2 pt-4">
           <h4 class="text-md font-semibold text-gray-700 border-b pb-1">
+            Select Model
+          </h4>
+          <select
+            id="model_selection"
+            name="model_selection"
+            form="topicForm"
+            class="border border-gray-300 rounded px-3 py-2 w-full text-sm"
+          >
+            <option value="llama3">LLaMA 3</option>
+            <option value="gemma3:1b">Gemma 3:1B</option>
+            <option value="gemma2:2b">Gemma 2:2B</option>
+          </select>
+        </div>
+
+        <div class="space-y-2 pt-4">
+          <h4 class="text-md font-semibold text-gray-700 border-b pb-1">
             Selection Memory
           </h4>
           <button

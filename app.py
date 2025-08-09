@@ -308,10 +308,19 @@ def build_prerequisite_tree_minimal(selected_structure):
 
     return result
 
-def verify_answer_with_models(question_obj):
-    models = ["llama3"]
+def verify_answer_with_models(question_obj, generation_model):
+    all_models = ["llama3", "gemma3:1b", "gemma2:2b"]
+    other_models = [m for m in all_models if m != generation_model]
     responses = []
     model_outputs = {}
+
+    # Add generation model's original answer as first vote
+    gen_answer = question_obj.get("correct_option")
+    if isinstance(gen_answer, int):
+        responses.append(gen_answer)
+        model_outputs[generation_model] = str(gen_answer)
+    else:
+        print(f"⚠️ No valid correct_option from generation model for: {question_obj.get('question')}")
 
     def get_answer_from_model(model_name, prompt_text):
         try:
@@ -333,7 +342,7 @@ def verify_answer_with_models(question_obj):
     options = [opt.strip() for opt in question_obj["options"]]
     question_text = question_obj["question"]
 
-    # Strip leading option numbering (e.g., '1. ') if present
+    # Remove numbering if needed
     stripped_options = []
     for opt in options:
         if opt[:2].isdigit() and opt[2:3] in ['.', ')']:
@@ -341,7 +350,6 @@ def verify_answer_with_models(question_obj):
         else:
             stripped_options.append(opt)
 
-    # Construct prompt with numbered stripped options
     prompt = f"Question: {question_text}\nOptions:\n"
     for idx, opt in enumerate(stripped_options, 1):
         prompt += f"{idx}. {opt}\n"
@@ -349,14 +357,16 @@ def verify_answer_with_models(question_obj):
 
     print(f"\n📤 Prompt sent to models:\n{prompt}\n")
 
-    for idx, model in enumerate(models):
+    # Collect answers from the other two models
+    for model in other_models:
         answer = get_answer_from_model(model, prompt)
         model_outputs[model] = answer
         if answer and answer.strip().isdigit():
             responses.append(int(answer.strip()))
 
-    print(f"\n📥 All model responses: {responses}")
+    print(f"\n📥 All model responses (including generation model): {responses}")
 
+    # Majority decision from all 3 votes
     match_counts = {}
     for resp in responses:
         match_counts[resp] = match_counts.get(resp, 0) + 1
@@ -374,9 +384,7 @@ def verify_answer_with_models(question_obj):
         question_obj["verified"] = False
         print("❌ Final verdict: Not Verified — No valid numeric responses from models")
 
-    # Store what each model said for frontend visibility
     question_obj["model_responses"] = model_outputs
-
     print("------------------------------------------------------")
 
 def generate_pdf(data, output_pdf, show_metadata=True):
@@ -629,7 +637,6 @@ def index():
         textbooks = []
     return render_template('index.html', textbooks=textbooks, textbooks_json=json.dumps(textbooks))
 
-# 2. Route to handle main selection (select.html)
 # 2. Route to handle main selection (select.html)
 @app.route('/select', methods=['POST'])
 def select():
@@ -900,6 +907,7 @@ def generate_questions_no_prereq():
 @app.route('/generate_questions_directly', methods=['POST'])
 def generate_questions_directly():
     selected_chapters = request.form.getlist("selected_chapters")
+    model_selection = request.form.get("model_selection", "llama3")  # get from form query param
     selected_topics = request.form.getlist("selected_topics")
     selected_subtopics = request.form.getlist("selected_subtopics")
     show_metadata = request.form.get("show_metadata", "off")
@@ -945,12 +953,14 @@ def generate_questions_directly():
     with open("structured_data/prepared_selected_data_direct.json", "w") as f:
         json.dump(final_data, f, indent=2)
 
-    return redirect(url_for("generate_questions_from_direct", show_metadata=show_metadata))
+    return redirect(url_for("generate_questions_from_direct", show_metadata=show_metadata, model_selection=model_selection))
 
 # 2.1.2 Route to generate questions directly from selected topics (result.html)
 @app.route('/generate_questions_from_direct')
 def generate_questions_from_direct():
     show_metadata = request.args.get("show_metadata") == "on"
+    selected_model = request.args.get("model_selection", "llama3")  # get from form query param
+    print(f"🔍 Selected model from request: {selected_model}")
 
     try:
         with open("structured_data/prepared_selected_data_direct.json", "r") as f:
@@ -1014,6 +1024,8 @@ def generate_questions_from_direct():
         subject = group["subject"]
         items = group["items"]
 
+        print(f"📝 Generating questions for Class: {class_key}, Subject: {subject} using model: {selected_model}")
+
         user_prompt = {
             "task": "Generate 1 MCQ per topic/subtopic using class difficulty and chapter context",
             "class": class_key,
@@ -1025,12 +1037,13 @@ def generate_questions_from_direct():
 
         try:
             result = subprocess.run(
-                ["ollama", "run", "llama3"],
+                ["ollama", "run", selected_model],
                 input=full_prompt,
                 capture_output=True,
                 text=True,
                 timeout=300
             )
+            print(f"✅ Model execution complete for {class_key} > {subject}")
             output = result.stdout.strip()
             json_start = output.find("{")
             json_end = output.rfind("}") + 1
@@ -1038,8 +1051,10 @@ def generate_questions_from_direct():
                 output_json = json.loads(output[json_start:json_end])
                 questions = output_json.get("questions", [])
                 for q in questions:
-                    verify_answer_with_models(q)
+                    verify_answer_with_models(q, selected_model)
                 all_questions.extend(questions)
+            else:
+                print(f"⚠️ No valid JSON found in model output for {class_key} > {subject}")
         except Exception as e:
             print(f"❌ Error generating for {class_key} > {subject}: {e}")
 
@@ -1476,6 +1491,7 @@ def recursive_prereq(level):
 def prepare_selected_data():
     # Existing logic to build selected_data...
     selected_chapters = request.form.getlist("selected_prereq_chapter")
+    model_selection = request.form.get("model_selection", "llama3")
     selected_topics = request.form.getlist("selected_topics")
     selected_subtopics = request.form.getlist("selected_subtopics")
 
@@ -1521,7 +1537,7 @@ def prepare_selected_data():
         json.dump(final_data, f, indent=2)
 
     # Pass metadata flag as query param
-    return redirect(url_for("generate_questions", show_metadata=show_metadata))
+    return redirect(url_for("generate_questions", show_metadata=show_metadata, model_selection=model_selection))
 
 # 2.2.2.1 Route to download prerequisite tree as PDF (next_step.html)
 @app.route('/download_prereqs')
@@ -1544,6 +1560,7 @@ def download_prereqs():
 @app.route('/generate_questions')
 def generate_questions():
     show_metadata = request.args.get("show_metadata") == "on"
+    selected_model = request.args.get("selected_model", "llama3")  # default llama3
 
     try:
         with open("structured_data/prepared_selected_data.json", "r") as f:
@@ -1604,7 +1621,6 @@ def generate_questions():
         "{ \"questions\": [ { \"class\": ..., \"subject\": ..., \"chapter\": ..., \"topic\": ..., \"subtopic\": ..., \"question\": ..., \"options\": [...], \"correct_option\": 1 }, ... ] }"
     )
 
-
     for group in grouped_targets:
         class_key = group["class"]
         subject = group["subject"]
@@ -1621,7 +1637,7 @@ def generate_questions():
 
         try:
             result = subprocess.run(
-                ["ollama", "run", "llama3"],
+                ["ollama", "run", selected_model],
                 input=full_prompt,
                 capture_output=True,
                 text=True,
@@ -1635,7 +1651,7 @@ def generate_questions():
                 output_json = json.loads(output[json_start:json_end])
                 questions = output_json.get("questions", [])
                 for q in questions:
-                    verify_answer_with_models(q)
+                    verify_answer_with_models(q, selected_model)
                 all_questions.extend(questions)
             else:
                 print(f"⚠️ Warning: Invalid JSON returned for {class_key} > {subject}")

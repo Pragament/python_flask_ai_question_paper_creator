@@ -165,6 +165,20 @@
           <h4 class="text-md font-semibold text-gray-700 border-b pb-1">
             Final Actions
           </h4>
+          <!-- Model Selection Dropdown -->
+          <div>
+            <label for="model_selection" class="block text-sm text-gray-700 mb-1">Select Model</label>
+            <select
+              id="model_selection"
+              name="model_selection"
+              form="topicForm"
+              class="border border-gray-300 rounded px-3 py-2 w-full text-sm"
+            >
+              <option value="llama3">LLaMA 3</option>
+              <option value="gemma3:1b">Gemma 3:1B</option>
+              <option value="gemma2:2b">Gemma 2:2B</option>
+            </select>
+          </div>
           <div class="flex items-center justify-between">
             <span class="text-sm text-gray-700">Show Metadata</span>
             <label class="relative inline-flex items-center cursor-pointer">
